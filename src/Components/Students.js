@@ -5,10 +5,20 @@ import { useNavigate } from 'react-router-dom'
 const Students = ({students, setStudents})=> {
   const navigate = useNavigate()
 
-  const deleteStudent = (studentId) =>{
-  const removedStudent = students.filter(student=>student.id !==studentId)
+  const deleteStudent = async (studentId) =>{
+    try{
+      const res = await fetch(`https://6474210b7de100807b1a6696.mockapi.io/studentsinfo/${studentId}`,{
+        method:"DELETE"
+    })
+    const data = await res.json()
+      setStudents(data)
+      const removedStudent = students.filter(student=>student.id !==studentId)
    setStudents(removedStudent)
+    }
+  catch(error) {
+  console.log(error)
   }
+}
   return (
     <Base
     title={"Students info"}

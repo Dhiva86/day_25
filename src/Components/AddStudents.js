@@ -1,72 +1,109 @@
-import React, { useState } from 'react'
+
 import Base from '../Base/Base'
 import { useNavigate } from 'react-router-dom'
-//import Students from './Students'
+import * as yup from "yup";
+import { useFormik } from "formik";
+
+
+export const StudentValidateSchma = yup.object({
+ name:yup.string().required("please fill the name"),
+ batch:yup.string().required("Enter the Batch details").min(5,"Enter the valid Batch"),
+ gender:yup.string().required("Mention the Gender"),
+ education:yup.string().required("Fill the education details")
+
+})
 
 function AddStudents({students, setStudents}) {
-    const [id, setId] = useState("")
-    const [name, setName] = useState("")
-    const [batch, setBatch] = useState("")
-    const [gender, setGender] = useState("")
-    const [education, setEducation] = useState("")
+  const {values, handleChange, handleSubmit, handleBlur,errors, touched} = useFormik({
+    initialValues:{
+      name:"",
+      batch:"",
+      gender:"",
+      education:""
+    },
+    validationSchema:StudentValidateSchma,
+    onSubmit:(newStudent) =>{
+      handleAddStudent(newStudent)
+    }
+  })
+
+   
     const navigate = useNavigate()
 
-  const handleAddStudent = ()=>{
-    const newStudent = {
-        id,
-        name,
-        batch,
-        gender,
-        education
-    }
-    //console.log(newStudent)
-   setStudents([...students, newStudent])
-    navigate("/students")
+  const handleAddStudent = async (newStudent)=>{
+   
+    try{
+      const response = await fetch(`https://6474210b7de100807b1a6696.mockapi.io/studentsinfo/`,{
+        method:"POST",
+        body:JSON.stringify(newStudent),
+        headers:{
+   "Content-Type": "application/json"
+        }
+    })
+    const data = await response.json()
+      console.log(data)
+      setStudents([...students, data])
+       navigate("/students")
+  }
+      catch(error){
+        console.log(error)
+      }
+    
+  
   }
 
   return (
     <Base
     title={"Add the new Students Details"}
     >
+      <form onSubmit={handleSubmit}>
     <div className='form-group'>
         <h4>Add Students</h4>
-        <input
-        placeholder='Enter the Id of Student'
-        type='number'
-        value={id}
-        onChange={(e)=>setId(e.target.value)}
-        />
+        
         <input
          placeholder='Enter the Name of Student'
          type='text'
-         value={name}
-         onChange={(e)=>setName(e.target.value)}
+         value={values.name}
+         onChange={handleChange}
+         onBlur={handleBlur}
+         name="name"
          />
+         {touched.name && errors.name? <div style={{color:"blue"}}>{errors.name}</div>:""}
         <input
          placeholder='Enter the Bach of Student'
          type='text'
-         value={batch}
-         onChange={(e)=>setBatch(e.target.value)}
+         value={values.batch}
+         onChange={handleChange}
+         onBlur={handleBlur}
+         name="batch"
          />
+         {touched.batch && errors.batch? <div style={{color:"blue"}}>{errors.batch}</div>:""}
         <input
          placeholder='Enter the Gender of Student'
          type='text'
-         value={gender}
-         onChange={(e)=>setGender(e.target.value)}
+         value={values.gender}
+         onChange={handleChange}
+         onBlur={handleBlur}
+         name="gender"
          />
+         {touched.gender && errors.gender? <div style={{color:"blue"}}>{errors.gender}</div>:""}
          <input
          placeholder='Enter the Education of Student'
          type='text'
-         value={education}
-         onChange={(e)=>setEducation(e.target.value)}
+         value={values.education}
+         onChange={handleChange}
+         onBlur={handleBlur}
+         name="education"
          />
+         {touched.education && errors.education? <div style={{color:"blue"}}>{errors.education}</div>:""}
          <br/>
          <div>
          <button
-         onClick={handleAddStudent}
+         
          >Add Student</button>
          </div>
     </div>
+    </form>
     </Base>
   )
 }
